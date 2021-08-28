@@ -1,3 +1,6 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
 \documentclass[a4paper,12pt]{article}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
@@ -35,15 +38,17 @@
 
 \usepackage{lipsum} % for dummy text
 
+%----------------------------------------------------------------------------------------
+%	Main Page PAGE
+%----------------------------------------------------------------------------------------
+
 \title{Text analysis of Trump’s tweets confirms he writes only the
 (angrier) Android half}
-
 \author{David Robinson}
-
 \date{August 2016}
-
 \begin{document}
 \maketitle
+%------------------------------------------------
 
 I don’t normally post about politics (I’m not particularly savvy about polling, which is where
 data science has had the largest impact on politics). But this weekend I saw a hypothesis about
@@ -61,11 +66,14 @@ in distinct ways. What’s more, we can see that the Android tweets are angrier 
 negative, while the iPhone tweets tend to be benign announcements and pictures. Overall I’d agree
 with @tvaziri’s analysis: this lets us tell the difference between the campaign’s tweets (iPhone) and
 Trump’s own (Android).
+%------------------------------------------------
 
 \section{The Dataset}
 First we’ll retrieve the content of Donald Trump’s timeline using the userTimeline function in the
 twitteR package:1
+%------------------------------------------------
 
+%------------------------------------------------
 
 \begin{lstlisting}
 library(dplyr)
@@ -73,6 +81,7 @@ library(purrr)
 library(twitteR)
 \end{lstlisting}
 
+%------------------------------------------------
 
  %Adding picture
   \begin{figure}[h!]
@@ -80,6 +89,7 @@ library(twitteR)
   \caption{Sanjay K V.}
   \label{fig:Tweet by Todd Vaziri}
 \end{figure}
+%------------------------------------------------
 
 
 
@@ -95,6 +105,8 @@ trump_tweets <- userTimeline("realDonaldTrump", n = 3200)
 trump_tweets_df <- tbl_df(map_df(trump_tweets, as.data.frame))
 \end{lstlisting}
 
+%------------------------------------------------
+
 %second code
 \begin{lstlisting}
 # if you want to follow along without setting up Twitter authentication,
@@ -102,6 +114,7 @@ trump_tweets_df <- tbl_df(map_df(trump_tweets, as.data.frame))
 load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
 \end{lstlisting}
 \printbibliography
+%------------------------------------------------
 
 %third code
 \begin{lstlisting}
@@ -112,7 +125,8 @@ tweets <- trump_tweets_df %>%
   extract(statusSource, "source", "Twitter for (.*?)<") %>%
   filter(source %in% c("iPhone", "Android"))
   \end{lstlisting}
-  
+%------------------------------------------------
+
   
   %Adding picture
   \begin{figure}[h!]
@@ -125,6 +139,7 @@ Overall, this includes 628 tweets from iPhone, and 762 tweets from Android.
 One consideration is what time of day the tweets occur, which we’d expect to be a “signature” of their user. Here we can certainly spot a difference:
 
 
+%------------------------------------------------
 
 %third code
 \begin{lstlisting}
@@ -141,7 +156,8 @@ tweets %>%
        y = "% of tweets",
        color = "")
   \end{lstlisting}
-  
+  %------------------------------------------------
+
   
   Trump on the Android does a lot more tweeting in the morning, while the campaign posts from the iPhone more in the afternoon and early evening.
 

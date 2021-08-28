@@ -2,6 +2,26 @@
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 
+\usepackage{listings}
+\usepackage{color}
+\renewcommand\lstlistingname{Quelltext} % Change language of section name
+\lstset{ % General setup for the package
+    language=Perl,
+    basicstyle=\small\sffamily,
+    numbers=left,
+     numberstyle=\tiny,
+    frame=tb,
+    tabsize=4,
+    columns=fixed,
+    showstringspaces=false,
+    showtabs=false,
+    keepspaces,
+    commentstyle=\color{red},
+    keywordstyle=\color{blue}
+}
+
+\usepackage{graphicx}
+
 %
 % For alternative styles, see the biblatex manual:
 % http://mirrors.ctan.org/macros/latex/contrib/biblatex/doc/biblatex.pdf
@@ -25,7 +45,6 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
 I don’t normally post about politics (I’m not particularly savvy about polling, which is where
 data science has had the largest impact on politics). But this weekend I saw a hypothesis about
 Donald Trump’s twitter account that simply begged to be investigated with data; see Figure 1.
@@ -47,6 +66,86 @@ Trump’s own (Android).
 First we’ll retrieve the content of Donald Trump’s timeline using the userTimeline function in the
 twitteR package:1
 
+
+\begin{lstlisting}
+library(dplyr)
+library(purrr)
+library(twitteR)
+\end{lstlisting}
+
+
+ %Adding picture
+  \begin{figure}[h!]
+  \includegraphics[width=\linewidth]{Tweet.png}
+  \caption{Sanjay K V.}
+  \label{fig:Tweet by Todd Vaziri}
+\end{figure}
+
+
+
+\begin{lstlisting}
+# You'd need to set global options with an authenticated app
+setup_twitter_oauth(getOption("twitter_consumer_key"),
+                    getOption("twitter_consumer_secret"),
+                    getOption("twitter_access_token"),
+                    getOption("twitter_access_token_secret"))
+# We can request only 3200 tweets at a time; it will return fewer
+# depending on the API
+trump_tweets <- userTimeline("realDonaldTrump", n = 3200)
+trump_tweets_df <- tbl_df(map_df(trump_tweets, as.data.frame))
+\end{lstlisting}
+
+%second code
+\begin{lstlisting}
+# if you want to follow along without setting up Twitter authentication,
+# just use my dataset:
+load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
+\end{lstlisting}
 \printbibliography
+
+%third code
+\begin{lstlisting}
+library(tidyr)
+
+tweets <- trump_tweets_df %>%
+  select(id, statusSource, text, created) %>%
+  extract(statusSource, "source", "Twitter for (.*?)<") %>%
+  filter(source %in% c("iPhone", "Android"))
+  \end{lstlisting}
+  
+  
+  %Adding picture
+  \begin{figure}[h!]
+  \includegraphics[width=\linewidth]{Chunk.png}
+  \caption{Sanjay K V.}
+  \label{fig:Tweet by Todd Vaziri}
+\end{figure}
+Overall, this includes 628 tweets from iPhone, and 762 tweets from Android.
+
+One consideration is what time of day the tweets occur, which we’d expect to be a “signature” of their user. Here we can certainly spot a difference:
+
+
+
+%third code
+\begin{lstlisting}
+library(lubridate)
+library(scales)
+
+tweets %>%
+  count(source, hour = hour(with_tz(created, "EST"))) %>%
+  mutate(percent = n / sum(n)) %>%
+  ggplot(aes(hour, percent, color = source)) +
+  geom_line() +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = "Hour of day (EST)",
+       y = "% of tweets",
+       color = "")
+  \end{lstlisting}
+  
+  
+  Trump on the Android does a lot more tweeting in the morning, while the campaign posts from the iPhone more in the afternoon and early evening.
+
+Another place we can spot a difference is in Trump’s anachronistic behavior of “manually retweeting” people by copy-pasting their tweets, then surrounding them with quotation marks:
+
 
 \end{document}

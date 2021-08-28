@@ -18,15 +18,34 @@
 \title{Text analysis of Trump’s tweets confirms he writes only the
 (angrier) Android half}
 
-\author{writeLaTeX}
+\author{David Robinson}
 
-\date{\today}
+\date{August 2016}
 
 \begin{document}
 \maketitle
 
 \section{Introduction}
+I don’t normally post about politics (I’m not particularly savvy about polling, which is where
+data science has had the largest impact on politics). But this weekend I saw a hypothesis about
+Donald Trump’s twitter account that simply begged to be investigated with data; see Figure 1.
+When Trump wishes the Olympic team good luck, he’s tweeting from his iPhone. When he’s
+insulting a rival, he’s usually tweeting from an Android. Is this an artifact showing which tweets
+are Trump’s own and which are by some handler?
+Others have explored Trump’s timeline and noticed this tends to hold up- and Trump himself
+does indeed tweet from a Samsung Galaxy. But how could we examine it quantitatively? I’ve been
+writing about text mining and sentiment analysis [1] recently, particularly during my development
+of the tidytext R package with Julia Silge, and this is a great opportunity to apply it again.
+My analysis, shown below, concludes that the Android and iPhone tweets are clearly from
+different people, posting during different times of day and using hashtags, links, and retweets
+in distinct ways. What’s more, we can see that the Android tweets are angrier and more
+negative, while the iPhone tweets tend to be benign announcements and pictures. Overall I’d agree
+with @tvaziri’s analysis: this lets us tell the difference between the campaign’s tweets (iPhone) and
+Trump’s own (Android).
 
+\section{The Dataset}
+First we’ll retrieve the content of Donald Trump’s timeline using the userTimeline function in the
+twitteR package:1
 
 \printbibliography
 

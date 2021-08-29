@@ -164,4 +164,111 @@ tweets %>%
 Another place we can spot a difference is in Trump’s anachronistic behavior of “manually retweeting” people by copy-pasting their tweets, then surrounding them with quotation marks:
 
 
+%----------------------------------------------------------------------------------------
+%  PAGE 4
+%----------------------------------------------------------------------------------------
+\section{Comparison of words}
+Now that we’re sure there’s a difference between these two accounts, what can we say about the difference in the content? We’ll use the tidytext package that Julia Silge and I developed.
+
+We start by dividing into individual words using the unnest_tokens function (see this vignette for more), and removing some common “stopwords”2:
+
+%third code
+\begin{lstlisting}
+library(tidytext)
+
+reg <- "([^A-Za-z\\d#@']|'(?![A-Za-z\\d#@]))"
+tweet_words <- tweets %>%
+  filter(!str_detect(text, '^"')) %>%
+  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|&amp;", "")) %>%
+  unnest_tokens(word, text, token = "regex", pattern = reg) %>%
+  filter(!word %in% stop_words$word,
+         str_detect(word, "[a-z]"))
+
+tweet_words
+  \end{lstlisting}
+ %------------------------------------------------
+  
+%Fourth code
+\begin{lstlisting}
+## # A tibble: 8,753 x 4
+##                    id source             created                   word
+##                 <chr>  <chr>              <time>                  <chr>
+## 1  676494179216805888 iPhone 2015-12-14 20:09:15                 record
+## 2  676494179216805888 iPhone 2015-12-14 20:09:15                 health
+## 3  676494179216805888 iPhone 2015-12-14 20:09:15 #makeamericagreatagain
+## 4  676494179216805888 iPhone 2015-12-14 20:09:15             #trump2016
+## 5  676509769562251264 iPhone 2015-12-14 21:11:12               accolade
+## 6  676509769562251264 iPhone 2015-12-14 21:11:12             @trumpgolf
+## 7  676509769562251264 iPhone 2015-12-14 21:11:12                 highly
+## 8  676509769562251264 iPhone 2015-12-14 21:11:12              respected
+## 9  676509769562251264 iPhone 2015-12-14 21:11:12                   golf
+## 10 676509769562251264 iPhone 2015-12-14 21:11:12                odyssey
+## # ... with 8,743 more rows
+  \end{lstlisting}  
+  %------------------------------------------------
+These should look familiar for anyone who has seen the feed. Now let’s consider which words are most common from the Android relative to the iPhone, and vice versa. We’ll use the simple measure of log odds ratio, calculated for each word as:3
+
+
+# in Android+1
+total Android+1
+# in iPhone+1
+total iPhone+1
+
+  
+  %Adding picture
+  \begin{figure}
+  \includegraphics[width=\linewidth]{bar-chart.png}
+  \caption{Sanjay K V.}
+  \label{fig:Tweet words plot}
+\end{figure}
+
+To measure the sentiment of the Android and iPhone tweets, we can count the number of words in each category:
+
+ %------------------------------------------------
+  
+%Fifth code
+\begin{lstlisting}
+sources <- tweet_words %>%
+  group_by(source) %>%
+  mutate(total_words = n()) %>%
+  ungroup() %>%
+  distinct(id, source, total_words)
+
+by_source_sentiment <- tweet_words %>%
+  inner_join(nrc, by = "word") %>%
+  count(sentiment, id) %>%
+  ungroup() %>%
+  complete(sentiment, id, fill = list(n = 0)) %>%
+  inner_join(sources) %>%
+  group_by(source, sentiment, total_words) %>%
+  summarize(words = sum(n)) %>%
+  ungroup()
+
+head(by_source_sentiment)
+  \end{lstlisting}  
+    This gives counts as in Table 1
+  %------------------------------------------------
+
+  \begin{table}[h!]
+  \begin{center}
+    \caption{Emotion Counts.}
+    \label{tab:table1}
+    \begin{tabular}{o\l|c|r|u} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
+      \textbf{ } & \textbf{Source} & \textbf{sentiment} & \textbf{total words} & \textbf{words}\\
+      
+      \hline
+      1 & Android & anger & 4901 & 321 \\
+      2 & Android & anticipation & 4901 & 256\\
+      3 & Android & disgust & 4901 & 207\\
+      3 & Android & fear & 4901 & 268\\
+      3 & Android & joy & 4901 & 199\\
+      3 & Android & negative & 4901 & 560\\
+    \end{tabular}
+  \end{center}
+\end{table}
+  
+  %----------------------------------------------------------------------------------------
+%  PAGE 6
+%----------------------------------------------------------------------------------------
+\section{Reference}
 \end{document}
